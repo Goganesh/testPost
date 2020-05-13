@@ -39,7 +39,7 @@ public class LoginTest {
 
     @Test(dataProvider = "loginPasswordData")
     public void shouldReturnResultForPostRequest2(String login, String password, boolean result) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-
+        System.out.println("login - " + login + ", password - " + password + ", result - " + result);
         //создаем диспетчер доверия, кот. не проверяет сертификаты
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
