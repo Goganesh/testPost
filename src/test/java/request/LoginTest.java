@@ -41,7 +41,7 @@ public class LoginTest {
     }
 
     @Test(dataProvider = "loginPasswordData")
-    public void shouldReturnResultForPostRequest2(String username, String password, int matcher) {
+    public void shouldReturnResultForPostRequest2(String username, String password) {
         //создаем диспетчер доверия, кот. не проверяет сертификаты
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -114,12 +114,7 @@ public class LoginTest {
             Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "200");
 
 
-        } catch (ParseException | MalformedURLException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("сообщение для сравнение " + e.getMessage());
             Assert.assertEquals(e.getMessage(), "");
         } finally {
 
