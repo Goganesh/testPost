@@ -29,17 +29,16 @@ public class LoginTest {
     @DataProvider()
     public Object[][] loginPasswordData(){
         return new Object[][]{
-                {"test_user", "q1w2e3r4", true},
-                {"test", "q1w2e3r4", true},
-                {"test_user", "q1", false},
-                {"test", "q1", false},
-                {"", "", false},
+                {"test_user", "q1w2e3r4", 1},
+                {"test", "q1w2e3r4", 1},
+                {"test_user", "q1", 0},
+                {"test", "q1", 0},
+                {"", "", 0},
         };
     }
 
     @Test(dataProvider = "loginPasswordData")
-    public void shouldReturnResultForPostRequest2(String login, String password, boolean result) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-        System.out.println("login - " + login + ", password - " + password + ", result - " + result);
+    public void shouldReturnResultForPostRequest2(String username, String password, int matcher) throws IOException, NoSuchAlgorithmException, KeyManagementException {
         //создаем диспетчер доверия, кот. не проверяет сертификаты
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -72,8 +71,8 @@ public class LoginTest {
         }
 
         String url = "";
-        String urlParameters = "username=test_user&password=q1w2e3r4";
-
+        StringBuilder stb = new StringBuilder("username=").append(username).append("&password=").append(password);
+        String urlParameters = stb.toString();
 
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 
@@ -106,15 +105,15 @@ public class LoginTest {
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(content.toString());
 
-            if(result){
+            if(matcher == 1){
                 // ожидаемый результат в случае верного ввода пароль/логина
                 Assert.assertEquals(jsonObject.get("loginState").toString(), "OK");
                 Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "200");
-            } else {
+            } else if (matcher == 0) {
                 // ожидаемый результат в случае неверного ввода пароль/логина
                 //ТРЕБУЕТСЯ ДО УТОЧНИТЬ логику
-                Assert.assertEquals(jsonObject.get("loginState").toString(), "ERROR");
-                Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "302");
+                //Assert.assertEquals(jsonObject.get("loginState").toString(), "ERROR");
+                Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "401");
             }
 
 
