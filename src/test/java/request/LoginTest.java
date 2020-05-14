@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import org.json.simple.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -29,16 +32,16 @@ public class LoginTest {
     @DataProvider()
     public Object[][] loginPasswordData(){
         return new Object[][]{
-                {"test_user", "q1w2e3r4", 1},
-                {"test", "q1w2e3r4", 1},
-                {"test_user", "q1", 0},
-                {"test", "q1", 0},
-                {"", "", 0},
+                {"test_user", "q1w2e3r4"},
+                {"test", "q1w2e3r4"},
+                {"test_user", "q1"},
+                {"test", "q1"},
+                {"", ""},
         };
     }
 
     @Test(dataProvider = "loginPasswordData")
-    public void shouldReturnResultForPostRequest2(String username, String password, int matcher) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+    public void shouldReturnResultForPostRequest2(String username, String password, int matcher) {
         //создаем диспетчер доверия, кот. не проверяет сертификаты
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
@@ -105,21 +108,19 @@ public class LoginTest {
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(content.toString());
 
-            if(matcher == 1){
-                // ожидаемый результат в случае верного ввода пароль/логина
-                Assert.assertEquals(jsonObject.get("loginState").toString(), "OK");
-                Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "200");
-            } else if (matcher == 0) {
-                // ожидаемый результат в случае неверного ввода пароль/логина
-                //ТРЕБУЕТСЯ ДО УТОЧНИТЬ логику
-                //Assert.assertEquals(jsonObject.get("loginState").toString(), "ERROR");
-                Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "401");
-            }
+
+            // ожидаемый результат в случае верного ввода пароль/логина
+            Assert.assertEquals(jsonObject.get("loginState").toString(), "OK");
+            Assert.assertEquals(jsonObject.get("httpStatusCode").toString(), "200");
 
 
-
-        } catch (ParseException e) {
+        } catch (ParseException | MalformedURLException e) {
             e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("сообщение для сравнение " + e.getMessage());
+            Assert.assertEquals(e.getMessage(), "");
         } finally {
 
             con.disconnect();
